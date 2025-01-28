@@ -1,151 +1,143 @@
-# RFID Access Control System Setup Guide
+# RFID Access Control System
 
-## Hardware Requirements
+เอกสารนี้อธิบายวิธีการตั้งค่าและติดตั้งฮาร์ดแวร์สำหรับระบบควบคุมการเข้าออกโดยใช้ RFID และ NodeMCU พร้อมการแจ้งเตือนผ่าน Line Notify
 
-- NodeMCU (ESP8266)
+## 1. อุปกรณ์ที่ต้องใช้
 
-- RFID-RC522 Module
+### อุปกรณ์หลัก
 
-- Solenoid Lock
+- **NodeMCU ESP8266** - ใช้สำหรับควบคุมระบบและการสื่อสาร WiFi
 
-- Relay Module
+- **RFID-RC522** - โมดูลอ่านบัตร RFID
 
-- Buzzer
+- **Relay Module** - สำหรับควบคุมโซลินอยด์ล็อค
 
-- Jumper wires
+- **Buzzer** - สำหรับเสียงแจ้งเตือน
 
-- Breadboard or soldering tools (optional)
+- **สาย Dupont** - สำหรับเชื่อมต่อวงจร
 
-## Hardware Connections
+- **โซลินอยด์ล็อค**
 
-### Pin Connections
+- **แหล่งจ่ายไฟ 5V**
 
-| **RFID-RC522 Module** | **NodeMCU (ESP8266)** |
+### ซอฟต์แวร์ที่ต้องใช้
 
-|------------------------|------------------------|
+- Arduino IDE - ใช้สำหรับเขียนโปรแกรมและอัปโหลดไปยัง NodeMCU
 
-| SDA                   | D4                     |
+- ไลบรารีเพิ่มเติม:
 
-| SCK                   | D5                     |
+  - `SPI.h`
 
-| MOSI                  | D7                     |
+  - `MFRC522.h`
 
-| MISO                  | D6                     |
+  - `ESP8266WiFi.h`
 
-| IRQ                   | Not Connected          |
+  - `WiFiClientSecure.h`
 
-| GND                   | GND                    |
+## 2. การต่อวงจร
 
-| RST                   | D3                     |
+| NodeMCU Pin | อุปกรณ์       | หมายเหตุ              |
 
-| 3.3V                  | 3.3V                   |
+|-------------|----------------|-----------------------|
 
-| **Relay Module** | **NodeMCU (ESP8266)** |
+| D3          | RST (RFID)    | ขารีเซ็ตโมดูล RFID   |
 
-|-------------------|------------------------|
+| D4          | SDA (RFID)    | ขาสำหรับสื่อสาร SPI  |
 
-| IN                | D1                     |
+| D1          | Relay Module  | ควบคุมโซลินอยด์ล็อค |
 
-| GND               | GND                    |
+| D2          | Buzzer        | สำหรับเสียงแจ้งเตือน |
 
-| VCC               | 3.3V                   |
+| 3V3         | VCC (RFID)    | จ่ายไฟให้โมดูล RFID  |
 
-| **Buzzer**  | **NodeMCU (ESP8266)** |
+| GND         | GND (RFID)    | เชื่อมต่อกราวด์      |
 
-|-------------|------------------------|
+### รูปแบบการต่อสาย
 
-| Positive (+)| D2                     |
+1\. เชื่อมต่อสาย Dupont ตามตารางด้านบน
 
-| Negative (-)| GND                    |
+2\. ต่อ Relay Module กับโซลินอยด์ล็อค (Relay ควบคุมวงจรไฟของโซลินอยด์)
 
-### Solenoid Lock Connection
+3\. ต่อ Buzzer เข้ากับ D2 และ GND
 
-Connect the solenoid lock to the relay module as follows:
+## 3. การตั้งค่าโปรแกรม
 
-1\. One wire of the solenoid lock to the COM terminal of the relay.
+### ขั้นตอนการติดตั้งไลบรารี
 
-2\. The other wire of the solenoid lock to the external power supply (+).
+1\. เปิด Arduino IDE
 
-3\. Connect the GND of the power supply to the GND terminal of the relay.
+2\. ไปที่ **Sketch** > **Include Library** > **Manage Libraries...**
 
-4\. The NO (Normally Open) terminal of the relay to the GND of the power supply.
+3\. ค้นหาและติดตั้งไลบรารีดังนี้:
 
-## Software Setup
+   - `MFRC522` (สำหรับโมดูล RFID-RC522)
 
-### 1. Install Required Libraries
+   - `ESP8266WiFi` (สำหรับการเชื่อมต่อ WiFi)
 
-Ensure you have the following libraries installed in the Arduino IDE:
+### การตั้งค่า WiFi และ Token
 
-- [MFRC522 Library](https://github.com/miguelbalboa/rfid)
+แก้ไขข้อมูลในโค้ดดังนี้:
 
-- ESP8266 Core for Arduino: Install via Arduino IDE board manager.
+```cpp
 
-### 2. Configure the Code
+const char *ssid = "your_wifi_name";          // ชื่อ WiFi ของคุณ
 
-1\. Open the provided `RFID_Access_Control.ino` file.
+const char *password = "your_wifi_password";  // รหัสผ่าน WiFi
 
-2\. Update the following variables in the code:
+const char *lineToken = "your_line_notify_token"; // Token ของ Line Notify
 
-   ```cpp
+```
 
-   const char *ssid = "your_wifi_name"; // Replace with your WiFi name
+### อัปโหลดโปรแกรม
 
-   const char *password = "your_wifi_password"; // Replace with your WiFi password
+1\. เชื่อมต่อ NodeMCU เข้ากับคอมพิวเตอร์ผ่านสาย USB
 
-   const char *lineToken = "your_line_notify_token"; // Replace with your Line Notify token
+2\. เลือกบอร์ด **NodeMCU 1.0 (ESP-12E Module)** และพอร์ตที่ถูกต้องใน **Tools**
 
-   byte allowedUID[4] = {0xDE, 0xAD, 0xBE, 0xEF}; // Replace with the UID of your RFID card
+3\. อัปโหลดโปรแกรมไปยัง NodeMCU
 
-   ```
+## 4. การใช้งาน
 
-### 3. Upload the Code
+1\. เมื่อเปิดระบบ โมดูล RFID จะเริ่มทำงานและรอการแตะบัตร
 
-1\. Connect the NodeMCU to your computer via a USB cable.
+2\. หากบัตรที่แตะมี UID ตรงกับที่ตั้งค่าไว้ในโปรแกรม:
 
-2\. In Arduino IDE:
+   - รีเลย์จะทำงานเพื่อปลดล็อคโซลินอยด์
 
-   - Select the correct **Board**: `NodeMCU 1.0 (ESP-12E Module)`
+   - Buzzer จะส่งเสียงแจ้งเตือน
 
-   - Select the correct **Port**
+   - ข้อมูลการเข้าถึง (ชื่อ, นามสกุล, เวลา) จะถูกส่งไปยัง Line Notify
 
-3\. Click on **Upload** to flash the code to the NodeMCU.
+3\. หาก UID ไม่ตรง ระบบจะส่งเสียงแจ้งเตือน (Buzzer ดัง 3 ครั้ง)
 
-### 4. Test the System
+## 5. ข้อควรระวัง
 
-1\. Power on the NodeMCU and ensure it connects to WiFi (check the Serial Monitor for confirmation).
+- ตรวจสอบการต่อวงจรก่อนจ่ายไฟทุกครั้ง
 
-2\. Tap an RFID card to the RFID reader:
+- ใช้แหล่งจ่ายไฟที่เหมาะสมสำหรับโซลินอยด์ล็อค
 
-   - If the UID matches the `allowedUID`, the relay will activate, unlocking the solenoid lock, and the buzzer will beep.
+- หลีกเลี่ยงการสัมผัสวงจรด้วยมือเปล่าระหว่างการทำงาน
 
-   - A message will be sent to your Line Notify.
+## 6. การแก้ไขปัญหา
 
-   - If the UID does not match, the buzzer will emit a "denied" sound.
+### ปัญหา: ไม่สามารถเชื่อมต่อ WiFi ได้
 
-## Troubleshooting
+- ตรวจสอบชื่อและรหัสผ่าน WiFi ว่าถูกต้อง
 
-1\. **WiFi not connecting**:
+- ตรวจสอบว่าเราเตอร์เปิดใช้งานอยู่
 
-   - Check your WiFi credentials in the code.
+### ปัญหา: โมดูล RFID ไม่อ่านบัตร
 
-   - Ensure your WiFi network is 2.4GHz (ESP8266 does not support 5GHz).
+- ตรวจสอบการต่อสาย SDA, SCK, MOSI, MISO, RST
 
-2\. **RFID not reading**:
+- ตรวจสอบว่าบัตร RFID อยู่ใกล้โมดูล
 
-   - Double-check the wiring between the RFID-RC522 and the NodeMCU.
+### ปัญหา: Line Notify ไม่ทำงาน
 
-   - Ensure the RFID card is compatible with the module (13.56MHz).
+- ตรวจสอบว่า Token ถูกต้อง
 
-3\. **Line Notify not working**:
+- ตรวจสอบสถานะ WiFi ของ NodeMCU
 
-   - Verify the Line Notify token.
+---
 
-   - Check the Serial Monitor for connection errors.
-
-## Additional Notes
-
-- Use a stable power supply for the solenoid lock (e.g., 12V, depending on your lock).
-
-- Place the RFID module in an easily accessible location for convenient scanning.
-
-- Ensure proper insulation of wires to avoid short circuits.
+เอกสารนี้เหมาะสำหรับผู้เริ่มต้นและผู้ที่ต้องการติดตั้งระบบควบคุมการเข้าออกด้วย RFID หากมีคำถามเพิ่มเติม สามารถสอบถามได้!
