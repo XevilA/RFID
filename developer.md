@@ -96,7 +96,7 @@
 
 #include <LiquidCrystal_I2C.h>
 
-// การตั้งค่าขา
+// Setขา
 
 #define RST_PIN D3
 
@@ -110,15 +110,15 @@ MFRC522 rfid(SDA_PIN, RST_PIN);
 
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 
-// WiFi Credentials
+// WiFi 
 
-const char *ssid = "your_wifi_name";
+const char *ssid = "SSID;
 
-const char *password = "your_wifi_password";
+const char *password = "Password";
 
 // Line Notify Token
 
-const char *lineToken = "your_line_notify_token";
+const char *lineToken = "notify_token";
 
 // UID ที่อนุญาต
 
