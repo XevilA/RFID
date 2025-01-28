@@ -81,9 +81,9 @@
 
 ```cpp
 
-const char *ssid = "your_wifi_name";          // ชื่อ WiFi ของคุณ
+const char *ssid = "your_wifi_name";          // ชื่อ WIFI SSID
 
-const char *password = "your_wifi_password";  // รหัสผ่าน WiFi
+const char *password = "your_wifi_password";  // รหัสผ่าน WIFI
 
 const char *lineToken = "your_line_notify_token"; // Token ของ Line Notify
 
